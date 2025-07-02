@@ -19,16 +19,16 @@ namespace Soenneker.Utils.Test.AuthHandler;
 /// Allows authentication via custom HTTP headers or JWT tokens, simulating authenticated users
 /// without requiring real authentication infrastructure.
 /// </summary>
-public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private readonly IHttpContextAccessor _context;
     private readonly IJwtUtil _jwtUtil;
 
-    private const string ObjectIdentifierClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
-    private const string AuthorizationHeader = "Authorization";
-    private const string AuthorizationUserIdHeader = "AuthorizationUserId";
-    private const string AuthorizationEmailHeader = "AuthorizationEmail";
-    private const string AuthorizationRolesHeader = "AuthorizationRoles";
+    private const string _objectIdentifierClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+    private const string _authorizationHeader = "Authorization";
+    private const string _authorizationUserIdHeader = "AuthorizationUserId";
+    private const string _authorizationEmailHeader = "AuthorizationEmail";
+    private const string _authorizationRolesHeader = "AuthorizationRoles";
 
     public TestAuthHandler(IHttpContextAccessor context, IJwtUtil jwtUtil, IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger, UrlEncoder encoder)
@@ -42,10 +42,10 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
     {
         IHeaderDictionary headers = _context.HttpContext!.Request.Headers;
 
-        if (headers.TryGetValue(AuthorizationUserIdHeader, out StringValues userIdValue))
+        if (headers.TryGetValue(_authorizationUserIdHeader, out StringValues userIdValue))
             return BuildAuthResultFromHeaders(headers, userIdValue);
 
-        if (headers.TryGetValue(AuthorizationHeader, out StringValues authorizationValue))
+        if (headers.TryGetValue(_authorizationHeader, out StringValues authorizationValue))
             return BuildAuthResultFromJwt(authorizationValue);
 
         return Task.FromResult(AuthenticateResult.Fail("User id/Email was not found in headers, and no JWT set on request"));
@@ -57,15 +57,15 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
         var claims = new List<Claim>(4)
         {
-            new(ObjectIdentifierClaim, userId)
+            new(_objectIdentifierClaim, userId)
         };
 
-        if (headers.TryGetValue(AuthorizationEmailHeader, out StringValues emailValue) && emailValue.Count > 0)
+        if (headers.TryGetValue(_authorizationEmailHeader, out StringValues emailValue) && emailValue.Count > 0)
         {
             claims.Add(new Claim(ClaimTypes.Email, emailValue[0] ?? ""));
         }
 
-        if (headers.TryGetValue(AuthorizationRolesHeader, out StringValues roles) && roles.Count > 0)
+        if (headers.TryGetValue(_authorizationRolesHeader, out StringValues roles) && roles.Count > 0)
         {
             ReadOnlySpan<char> span = roles[0].AsSpan();
             var start = 0;
@@ -92,7 +92,7 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 
-    private Task<AuthenticateResult> BuildAuthResultFromJwt(StringValues authorizationValue)
+    private async Task<AuthenticateResult> BuildAuthResultFromJwt(StringValues authorizationValue)
     {
         string authHeader = authorizationValue.Count > 0 ? authorizationValue[0] ?? "" : "";
 
@@ -101,9 +101,9 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
         string token = spaceIndex >= 0 ? span.Slice(spaceIndex + 1).ToString() : "";
 
-        ClaimsPrincipal claimsPrincipal = _jwtUtil.GetPrincipal(token)!;
+        ClaimsPrincipal? claimsPrincipal = (await _jwtUtil.GetPrincipal(token))!;
 
         var ticket = new AuthenticationTicket(claimsPrincipal, JwtBearerDefaults.AuthenticationScheme);
-        return Task.FromResult(AuthenticateResult.Success(ticket));
+        return AuthenticateResult.Success(ticket);
     }
 }
