@@ -82,7 +82,7 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
             claims.Add(new Claim(ClaimTypes.Role, _defaultRole));
         }
 
-        var principal = claims.ToClaimsPrincipal();
+        var principal = claims.ToClaimsPrincipal("Test");
         var ticket = new AuthenticationTicket(principal, JwtBearerDefaults.AuthenticationScheme);
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
