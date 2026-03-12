@@ -44,7 +44,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
         <PackageReference Include="Soenneker.Extensions.List.Claims" Version="4.0.45" />
         <PackageReference Include="Soenneker.Utils.Jwt" Version="4.0.1379" />
     </ItemGroup>
