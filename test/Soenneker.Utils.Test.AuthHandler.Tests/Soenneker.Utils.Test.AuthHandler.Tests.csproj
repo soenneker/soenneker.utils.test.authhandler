@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Utils.Test.AuthHandler.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Utils.Test.AuthHandler\Soenneker.Utils.Test.AuthHandler.csproj" />
     </ItemGroup>
 
     <ItemGroup>
