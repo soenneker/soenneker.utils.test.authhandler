@@ -1,16 +1,15 @@
-﻿using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Utils.Test.AuthHandler.Tests;
 
-[Collection("Collection")]
-public class TestAuthHandlerTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class TestAuthHandlerTests : HostedUnitTest
 {
-    public TestAuthHandlerTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public TestAuthHandlerTests(Host host) : base(host)
     {
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
