@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Soenneker.Utils.Test.AuthHandler;
 
+/// <summary>
+/// Represents the test auth handler.
+/// </summary>
 public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private readonly IJwtUtil _jwtUtil;
