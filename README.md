@@ -23,7 +23,7 @@ services
     .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
 ```
 
-`TestAuthHandler` depends on `IJwtUtil`, so register that in the test host as well.
+`TestAuthHandler` depends on `IJwtUtil`, so register that in the test host as well. Set `"Test"` as the default authentication scheme when requests should use this handler automatically.
 
 ## Authenticate a test request
 
@@ -35,4 +35,25 @@ client.DefaultRequestHeaders.Add("AuthorizationEmail", "test@example.com");
 client.DefaultRequestHeaders.Add("AuthorizationRoles", "Admin,Manager");
 ```
 
-If `AuthorizationRoles` is omitted, the handler assigns the `Admin` role. Alternatively, send a normal `Authorization: Bearer <token>` header to build the principal from a JWT.
+The resulting principal contains the Microsoft identity-platform object identifier claim, an optional `ClaimTypes.Email` claim, and one `ClaimTypes.Role` claim per role. Role values may be sent as repeated headers, comma-separated values, or both; whitespace around comma-separated roles is trimmed. If `AuthorizationRoles` is omitted, the handler assigns the `Admin` role.
+
+`AuthorizationUserId` takes precedence over `Authorization`. Header-created identities use the configured authentication scheme name.
+
+## Authenticate with a token
+
+Alternatively, send an authorization value containing a scheme followed by a token:
+
+```csharp
+using System.Net.Http.Headers;
+
+client.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("Bearer", token);
+```
+
+The handler passes the text after the first space to `IJwtUtil.GetPrincipal`. For test compatibility it does not require the scheme text itself to be `Bearer`. If the token does not produce a principal, authentication fails instead of creating a ticket.
+
+## Failure behavior
+
+Authentication fails when neither `AuthorizationUserId` nor `Authorization` is present. JWT parsing exceptions from `IJwtUtil` propagate through the authentication pipeline; a null principal becomes a normal failed authentication result.
+
+This package is intended only for controlled integration-test hosts. The identity headers are trusted input and must never be enabled as an authentication mechanism in a deployed application.

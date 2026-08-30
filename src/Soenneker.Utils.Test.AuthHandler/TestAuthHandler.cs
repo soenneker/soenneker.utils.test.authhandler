@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -54,7 +53,7 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
         return _sMissingAuthFail;
     }
 
-    private static Task<AuthenticateResult> BuildAuthResultFromHeaders(IHeaderDictionary headers, StringValues userIdValues)
+    private Task<AuthenticateResult> BuildAuthResultFromHeaders(IHeaderDictionary headers, StringValues userIdValues)
     {
         // StringValues is a struct, Count is cheap, indexer returns string?
         string userId = userIdValues.Count > 0 ? (userIdValues[0] ?? string.Empty) : string.Empty;
@@ -86,7 +85,7 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
         }
 
         var principal = claims.ToClaimsPrincipal("Test");
-        var ticket = new AuthenticationTicket(principal, JwtBearerDefaults.AuthenticationScheme);
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
@@ -139,8 +138,11 @@ public sealed class TestAuthHandler : AuthenticationHandler<AuthenticationScheme
 
         async Task<AuthenticateResult> BuildTicketFromPrincipalAsync(string t)
         {
-            ClaimsPrincipal? principal = (await _jwtUtil.GetPrincipal(t))!;
-            var ticket = new AuthenticationTicket(principal, JwtBearerDefaults.AuthenticationScheme);
+            ClaimsPrincipal? principal = await _jwtUtil.GetPrincipal(t);
+            if (principal is null)
+                return AuthenticateResult.Fail("The supplied token did not produce a claims principal");
+
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
             return AuthenticateResult.Success(ticket);
         }
     }
