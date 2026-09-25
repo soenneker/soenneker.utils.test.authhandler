@@ -46,7 +46,7 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Extensions.List.Claims" Version="4.0.58" />
-        <PackageReference Include="Soenneker.Utils.Jwt" Version="4.0.1513" />
+        <PackageReference Include="Soenneker.Utils.Jwt" Version="4.0.1514" />
     </ItemGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
