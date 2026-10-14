@@ -45,7 +45,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Extensions.List.Claims" Version="4.0.66" />
+        <PackageReference Include="Soenneker.Extensions.List.Claims" Version="4.0.67" />
         <PackageReference Include="Soenneker.Utils.Jwt" Version="4.0.1528" />
     </ItemGroup>
     <ItemGroup>
